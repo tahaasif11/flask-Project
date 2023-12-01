@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Weather App task 5 with promises</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+			}
+
+			table {
+				border-collapse: collapse;
+				width: 100%;
+				margin-top: 20px;
+			}
+
+			th,
+			td {
+				border: 1px solid #ccc;
+				padding: 10px;
+				text-align: left;
+			}
+		</style>
+	</head>
+	<body>
+		<table id="weather-table">
+			<thead>
+				<tr>
+					<th>City Name</th>
+					<th>Temperature (°C)</th>
+				    <th>Weather Description</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+
+		<script>
+			document.addEventListener("DOMContentLoaded", async function () {
+				const cities = [
+					{ name: "New York", lat: "40.7128", lon: "-74.0060" },
+					{ name: "Tokyo", lat: "35.6895", lon: "139.6917" },
+					{ name: "London", lat: "51.5074", lon: "-0.1278" },
+					{ name: "Sydney", lat: "-33.8688", lon: "151.2093" },
+					{ name: "Paris", lat: "48.8566", lon: "2.3522" },
+					{ name: "Lahore", lat: "31.582045", lon: "74.329376" },
+					{ name: "New Delhi", lat: "28.6139", lon: "77.2090" },
+				];
+
+				function getWeather(city) {
+					const url = `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&appid=7cb5a0ab4eff70e38de7389cad9d9b0c`;
+
+					return fetch(url)
+						.then((response) => 
+                        {
+							if (!response.ok) 
+                            {
+								throw new Error(`HTTP error! Status: ${response.status}`);
+							}
+
+							return response.json();
+						})
+						.then((data) => 
+                        {
+							console.log(`Weather in ${city.name}:`, data);
+							return {
+								cityName: city.name,
+								temperature: (data.main.temp - 273.15).toFixed(2),
+								description: data.weather[0].description,
+							};
+						})
+						.catch((error) => 
+                        {
+							console.error("Error fetching weather:", error);
+						});
+				}
+
+				Promise.all(cities.map(getWeather))
+					.then((allWeatherData) => 
+                    {
+						console.log("All weather data:", allWeatherData);
+
+						const tableBody = document.querySelector("#weather-table tbody");
+
+						allWeatherData.forEach((weather) => 
+                        {
+							if (weather != null) 
+                            {
+								const row = document.createElement("tr");
+								const cityNameCell = document.createElement("td");
+								cityNameCell.textContent = weather.cityName;
+								const temperatureCell = document.createElement("td");
+								temperatureCell.textContent = weather.temperature;
+								const descriptionCell = document.createElement("td");
+								descriptionCell.textContent = weather.description;
+
+								row.appendChild(cityNameCell);
+								row.appendChild(temperatureCell);
+								row.appendChild(descriptionCell);
+
+								tableBody.appendChild(row);
+							} else 
+                            {
+								const row = document.createElement("tr");
+								const messageCell = document.createElement("td");
+								messageCell.setAttribute("colspan", "3");
+								messageCell.textContent =
+									"Weather data not available for this city";
+								row.appendChild(messageCell);
+								tableBody.appendChild(row);
+							}
+						});
+					})
+					.catch((error) => 
+                    {
+						console.error("Error fetching weather for all cities:", error);
+					});
+			});
+		</script>
+	</body>
+</html>
