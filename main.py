@@ -10,6 +10,11 @@ def home():
     return render_template('home.html')
 
 
+@app.route('/user/<user>')
+def profile(user):
+    return render_template('user.html', user=user)
+
+
 @app.route('/about')
 def about():
     return render_template('weather_api.html')
