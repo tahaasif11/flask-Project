@@ -1,7 +1,5 @@
-# save this as app.py
-import uuid
 
-from flask import Flask, render_template, flash, g
+from flask import Flask, render_template, flash, g, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -46,6 +44,25 @@ class UserForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired()])
     submit = SubmitField("Submit Form")
 
+
+@app.route('/edit/<id>', methods=['GET', 'POST'])
+def edit(id):
+    form = UserForm()
+    connection, cursor = openDbconnection()
+    cursor.execute("""
+                SELECT * FROM users WHERE id= %s""",(id,))
+    user = cursor.fetchone()
+    if form.validate_on_submit():
+        data = (form.name.data, form.email.data)
+        cursor.execute("""
+            UPDATE users SET username=%s, email=%s WHERE id=%s
+        """, (form.name.data,form.email.data,id))
+        connection.commit()
+        flash("Successfully created")
+        return redirect(url_for('profile', user=form.name.data))
+    return render_template('user_edit.html', form=form,user=user)
+
+
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -77,7 +94,7 @@ def register():
     if form.validate_on_submit():
         # cursor = mysql.connection.cursor()
         
-        data = ( form.name.data, form.email.data)
+        data = (form.name.data, form.email.data)
         cursor.execute("""
                 INSERT INTO users
                 (username,email)

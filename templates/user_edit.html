@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for message in get_flashed_messages() %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>{{message}}</strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endfor %}
+
+
+<div class="container mt-5">
+    <form method="POST">
+        <div class="form-group">
+            {{ form.hidden_tag() }}
+            {{ form.name.label(class="form-control-label") }}
+            {{ form.name(class="form-control mb-3", value=user.username) }}
+            {{ form.email.label(class="form-control-label") }}
+            {{ form.email(class="form-control mb-3", value=user.email) }}
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+{% endblock %}
